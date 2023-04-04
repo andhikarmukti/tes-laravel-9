@@ -63,4 +63,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function shipApproved()
+    {
+        return $this->hasMany(Ship::class, 'user_id', 'id')->where('is_verification', 1);
+    }
 }

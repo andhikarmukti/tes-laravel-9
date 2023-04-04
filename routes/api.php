@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ShipController;
 use App\Http\Controllers\UserController;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -24,30 +25,37 @@ use Spatie\Permission\Models\Role;
 // });
 
 Route::group(['prefix' => 'auth'], function () {
-
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-
     // register
     Route::post('/send-otp', [AuthController::class, 'sendOtp']);
     Route::post('/register', [AuthController::class, 'register']);
-
 });
 
-Route::group(['middleware' => 'auth:api'], function () {
-
+Route::group(['middleware' => ['auth', 'isActiveUser']], function () {
     Route::post('/refresh', [AuthController::class, 'refresh']);
-    Route::post('/me', [AuthController::class, 'me']);
+    // Ship
+    Route::post('/ship', [ShipController::class, 'store']);
+    Route::post('/ship-edit', [ShipController::class, 'update']);
+    Route::get('/ship', [ShipController::class, 'index']);
+    // Users
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [AuthController::class, 'profile']);
+    Route::post('/profile-edit', [AuthController::class, 'profileEdit']);
 
-    Route::group(['middleware' => ['role:admin']], function () {
-
+    Route::group(['middleware' => ['role:admin']], function () { // Admin Only
         // Users
         Route::get('/user-need-approval', [UserController::class, 'userNeedApproval']);
         Route::post('/approval-user', [UserController::class, 'approvalUser']);
-
+        Route::post('/delete-user', [UserController::class, 'deleteUser']);
+        // Ships
+        Route::get('/ship-need-approval', [ShipController::class, 'shipNeedApproval']);
+        Route::post('/ship-approval', [ShipController::class, 'shipApproval']);
+        Route::post('/ship-delete', [ShipController::class, 'shipDelete']);
     });
 
 });
+
+Route::get('/ship-public', [ShipController::class, 'getShipPublic']);
 
 Route::post('/tes', function(){
     // $user = User::find(1);

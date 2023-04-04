@@ -37,7 +37,21 @@ class UserController extends Controller
 
         return response()->json([
             'code' => 200,
-            'message' => 'User has been successfully approved!',
+            'message' => 'User has been deactivated!',
+            'data' => $user
+        ], 200);
+    }
+
+    public function deleteUser(Request $request)
+    {
+        /** @var User $user */
+        $user = User::find($request->id);
+        $user->is_approved = 0;
+        $user->save();
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'User is not active!',
             'data' => $user
         ], 200);
     }

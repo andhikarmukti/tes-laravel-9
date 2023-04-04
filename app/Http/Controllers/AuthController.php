@@ -152,9 +152,36 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function me()
+    public function profile()
     {
-        return response()->json(auth()->user());
+        $user = User::where('id', auth()->user()->id)->with('shipApproved')->first();
+        return response()->json($user);
+    }
+
+    public function profileEdit(Request $request)
+    {
+        /** @var User $user_access */
+        $user_access = auth()->user();
+        $user_will_be_edited = User::find($request->id);
+        $name = $request->name;
+
+        if($user_access->hasRole('user')){
+            if(auth()->user()->id != $user_will_be_edited->id){
+                return response()->json([
+                    'code' => 400,
+                    'message' => "You can't delete someone else's ship"
+                ], 400);
+            }
+        }
+
+        $user_will_be_edited->name = $name;
+        $user_will_be_edited->save();
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'User profile has been edited',
+            'data' => $user_will_be_edited
+        ], 200);
     }
 
     /**
